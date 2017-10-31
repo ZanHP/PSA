@@ -109,43 +109,39 @@ def napadalni_polozaji(matrika):
     print(polozaji)
     return polozaji
 
-
-def razdalje(L, matrika):
-    # matriko spremeni tako, da pike zamenja z oddaljenostjo polja od začetnega položaja viteza
-    mat = [vrstica[:] for vrstica in matrika]
-    mat = floodfill(mat, vitez, L)
-    print(mat)
-
-
 def floodfill(matrika, polozaj, L, n=0, drugic=False):
-    print("N:",n)
+    # smo na položaju in poplavimo (spremenimo v 1) vse, kar je oddaljeno za največ L
+    #print("N:",n)
     if n == 0 or n > L:
         if drugic:
-            print("mm:", matrika)
-            return matrika
-    mozni = mozni_premiki(polozaj, matrika)
+            #print("mm:", matrika)
+            return
+
+
     i,j = polozaj
     if matrika[i][j] == '.':
         matrika[i][j] = 1
-    for premik in mozni:
-        a,b = premik
-        floodfill(matrika, (i+a,j+b), L, n+1, True)
-    print("n:",n, matrika)
 
+    mozni = mozni_premiki(polozaj, matrika)
+    for k in range(len(mozni)):
+        a,b = mozni[k]
+        floodfill(matrika, (i+a,j+b), L, n+1, True)
+        if n == 0:
+            #print("n:",n, matrika)
+            return matrika
+
+import operator
 
 def najboljsi_napad(L, M=matrika):
-    if L == 0:
-        global vitez
-        i,j = vitez
-        napadi = napadalni_polozaji(matrika)
-        return napadalni_polozaji(matrika)[(i,j)]
-    # for premik in mozni_premiki(vitez, matrika):
-    #     i,j = vitez
-    #     a,b = premik
-    #     spr_matrika = matrika[:][:]
-    #     spr_matrika[i][j], spr_matrika[i+a][j+b] = ".", "V"
-    #     vitez = (i+a,j+b)
-    #     najboljsi_napad(L-1, spr_matrika)
+    napadi = napadalni_polozaji(M)
+    napadi = sorted(napadi.items(), key=operator.itemgetter(1),reverse=True)
+    #print("napadi:",napadi)
+    mat = floodfill(matrika, vitez, L)
+    #print(mat)
+    for k in range(len(napadi)):
+        i,j = napadi[k][0]
+        if mat[i][j] == 1:
+            return napadi[k][1]
 
 st_testov = int(input().strip())
 presledek = input()
@@ -171,7 +167,8 @@ for st in range(st_testov):
                 zmaj = (i,j)
 
     #print(matrika, "vitez:", vitez)
-    print(razdalje(L,matrika))
+    print(najboljsi_napad(L, matrika))
     #print(najboljsi_napad(L, matrika))
+
     if st < st_testov - 1:
         presledek = input()
